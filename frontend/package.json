@@ -1,24 +1,22 @@
 {
-  "name": "asilo-cabeza-algodon-frontend",
+  "name": "cabeza-de-algodon-frontend",
   "version": "1.0.0",
-  "description": "Frontend del Sistema Asilo de Ancianos Cabeza de Algodón",
-  "author": "Omar Cabrera",
-  "license": "PROPRIETARY",
   "private": true,
+  "author": "O. Cabrera",
+  "license": "PROPRIETARY",
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.20.1",
     "react-scripts": "5.0.1",
     "axios": "^1.6.2",
-    "framer-motion": "^10.16.16",
-    "react-icons": "^4.12.0",
     "react-hot-toast": "^2.4.1",
+    "lucide-react": "^0.294.0",
     "date-fns": "^2.30.0",
-    "chart.js": "^4.4.1",
-    "react-chartjs-2": "^5.2.0",
+    "recharts": "^2.10.3",
     "jspdf": "^2.5.1",
-    "jspdf-autotable": "^3.8.2"
+    "xlsx": "^0.18.5",
+    "http-proxy-middleware": "^2.0.6"
   },
   "scripts": {
     "start": "react-scripts start",

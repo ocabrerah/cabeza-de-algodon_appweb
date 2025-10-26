@@ -1,148 +1,152 @@
-/**
- * Página de Dashboard
- * @author Omar Cabrera
- */
-
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { FiUsers, FiActivity, FiDollarSign, FiTrendingUp, FiCalendar, FiAlertCircle } from 'react-icons/fi';
-import { useAuth } from '../context/AuthContext';
 import Layout from '../components/Layout';
-import axios from 'axios';
-import toast from 'react-hot-toast';
+import Card from '../components/Card';
+import { Users, ClipboardList, Stethoscope, DollarSign, TrendingUp, AlertCircle } from 'lucide-react';
+import { mockPacientes, mockSolicitudes, mockVisitas, calcularResumenCaja } from '../data/mockData';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
 import './Dashboard.css';
 
 const Dashboard = () => {
-  const { user } = useAuth();
-  const [stats, setStats] = useState({
-    pacientes: 0,
-    solicitudes_pendientes: 0,
-    visitas_hoy: 0,
-    ingresos_mes: 0
+  const [estadisticas, setEstadisticas] = useState({
+    totalPacientes: 0,
+    solicitudesPendientes: 0,
+    visitasHoy: 0,
+    ingresos: 0,
+    egresos: 0,
+    balance: 0
   });
-  const [loading, setLoading] = useState(true);
+  const [cargando, setCargando] = useState(false);
 
   useEffect(() => {
-    loadDashboardData();
+    cargarDatos();
   }, []);
 
-  const loadDashboardData = async () => {
-    try {
-      // Cargar datos simulados (puedes implementar endpoints específicos)
-      const [pacientesRes, solicitudesRes] = await Promise.all([
-        axios.get('/api/pacientes'),
-        axios.get('/api/solicitudes?estado=pendiente')
-      ]);
-
-      setStats({
-        pacientes: pacientesRes.data.data?.length || 0,
-        solicitudes_pendientes: solicitudesRes.data.data?.length || 0,
-        visitas_hoy: 0,
-        ingresos_mes: 0
-      });
-    } catch (error) {
-      console.error('Error al cargar dashboard:', error);
-    } finally {
-      setLoading(false);
-    }
+  const cargarDatos = () => {
+    const resumenCaja = calcularResumenCaja();
+    const solicitudesPendientes = mockSolicitudes.filter(s => s.estado === 'pendiente' || s.estado === 'en_proceso');
+    
+    setEstadisticas({
+      totalPacientes: mockPacientes.length,
+      solicitudesPendientes: solicitudesPendientes.length,
+      visitasHoy: 2,
+      ingresos: resumenCaja.ingresos,
+      egresos: resumenCaja.egresos,
+      balance: resumenCaja.balance
+    });
   };
 
-  const statsCards = [
-    {
-      title: 'Total Pacientes',
-      value: stats.pacientes,
-      icon: FiUsers,
-      color: 'primary',
-      trend: '+12%'
-    },
-    {
-      title: 'Solicitudes Pendientes',
-      value: stats.solicitudes_pendientes,
-      icon: FiCalendar,
-      color: 'warning',
-      trend: '5 nuevas'
-    },
-    {
-      title: 'Visitas Hoy',
-      value: stats.visitas_hoy,
-      icon: FiActivity,
-      color: 'success',
-      trend: '3 programadas'
-    },
-    {
-      title: 'Ingresos del Mes',
-      value: `L. ${stats.ingresos_mes.toLocaleString()}`,
-      icon: FiDollarSign,
-      color: 'info',
-      trend: '+8%'
-    }
+  const datosGrafico = [
+    { mes: 'Ene', ingresos: 45000, egresos: 32000 },
+    { mes: 'Feb', ingresos: 52000, egresos: 35000 },
+    { mes: 'Mar', ingresos: 48000, egresos: 38000 },
+    { mes: 'Abr', ingresos: 61000, egresos: 42000 },
+    { mes: 'May', ingresos: 55000, egresos: 39000 },
+    { mes: 'Jun', ingresos: 67000, egresos: 45000 }
   ];
 
   return (
     <Layout>
-      <div className="dashboard-page">
-        <div className="page-header">
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <h1>Dashboard</h1>
-            <p>Bienvenido, {user?.nombre} {user?.apellido}</p>
-          </motion.div>
+      <div className="dashboard">
+        <div className="dashboard-header">
+          <h1>Resumen General</h1>
+          <p>Vista panorámica del estado del asilo</p>
         </div>
 
-        {loading ? (
-          <div className="dashboard-loading">
-            <div className="loader"></div>
-            <p>Cargando información...</p>
-          </div>
-        ) : (
-          <>
-            <div className="stats-grid">
-              {statsCards.map((stat, index) => (
-                <motion.div
-                  key={stat.title}
-                  className={`stat-card stat-${stat.color}`}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                >
-                  <div className="stat-icon">
-                    <stat.icon />
-                  </div>
-                  <div className="stat-content">
-                    <p className="stat-title">{stat.title}</p>
-                    <h3 className="stat-value">{stat.value}</h3>
-                    <span className="stat-trend">
-                      <FiTrendingUp /> {stat.trend}
-                    </span>
-                  </div>
-                </motion.div>
-              ))}
+        {/* Estadísticas principales */}
+        <div className="stats-grid">
+          <Card className="stat-card stat-primary">
+            <div className="stat-icon">
+              <Users size={32} />
             </div>
+            <div className="stat-content">
+              <h3>Pacientes Activos</h3>
+              <p className="stat-value">{estadisticas.totalPacientes}</p>
+              <span className="stat-label">Total en el asilo</span>
+            </div>
+          </Card>
 
-            <div className="dashboard-content">
-              <motion.div
-                className="info-card"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.4 }}
-              >
-                <div className="info-icon">
-                  <FiAlertCircle />
-                </div>
-                <div className="info-content">
-                  <h3>Sistema Operativo</h3>
-                  <p>
-                    El sistema está funcionando correctamente. 
-                    Todos los módulos están disponibles y operativos.
-                  </p>
-                </div>
-              </motion.div>
+          <Card className="stat-card stat-warning">
+            <div className="stat-icon">
+              <ClipboardList size={32} />
             </div>
-          </>
-        )}
+            <div className="stat-content">
+              <h3>Solicitudes Pendientes</h3>
+              <p className="stat-value">{estadisticas.solicitudesPendientes}</p>
+              <span className="stat-label">Por asignar</span>
+            </div>
+          </Card>
+
+          <Card className="stat-card stat-info">
+            <div className="stat-icon">
+              <Stethoscope size={32} />
+            </div>
+            <div className="stat-content">
+              <h3>Visitas Hoy</h3>
+              <p className="stat-value">{estadisticas.visitasHoy}</p>
+              <span className="stat-label">Programadas</span>
+            </div>
+          </Card>
+
+          <Card className="stat-card stat-success">
+            <div className="stat-icon">
+              <DollarSign size={32} />
+            </div>
+            <div className="stat-content">
+              <h3>Balance</h3>
+              <p className="stat-value">Q{estadisticas.balance.toLocaleString()}</p>
+              <span className="stat-label">Ingresos - Egresos</span>
+            </div>
+          </Card>
+        </div>
+
+        {/* Gráficos */}
+        <div className="dashboard-charts">
+          <Card title="Ingresos vs Egresos (Últimos 6 meses)">
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={datosGrafico}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="mes" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="ingresos" fill="#27ae60" name="Ingresos" />
+                <Bar dataKey="egresos" fill="#e74c3c" name="Egresos" />
+              </BarChart>
+            </ResponsiveContainer>
+          </Card>
+
+          <Card title="Tendencia Mensual">
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={datosGrafico}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="mes" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Line type="monotone" dataKey="ingresos" stroke="#27ae60" strokeWidth={2} name="Ingresos" />
+                <Line type="monotone" dataKey="egresos" stroke="#e74c3c" strokeWidth={2} name="Egresos" />
+              </LineChart>
+            </ResponsiveContainer>
+          </Card>
+        </div>
+
+        {/* Alertas */}
+        <Card title="Alertas y Notificaciones" className="alerts-card">
+          <div className="alert-item alert-warning">
+            <AlertCircle size={20} />
+            <div>
+              <h4>Solicitudes Pendientes</h4>
+              <p>Hay {estadisticas.solicitudesPendientes} solicitudes médicas esperando asignación</p>
+            </div>
+          </div>
+          <div className="alert-item alert-info">
+            <TrendingUp size={20} />
+            <div>
+              <h4>Balance Positivo</h4>
+              <p>El balance del mes es positivo: Q{estadisticas.balance.toLocaleString()}</p>
+            </div>
+          </div>
+        </Card>
       </div>
     </Layout>
   );

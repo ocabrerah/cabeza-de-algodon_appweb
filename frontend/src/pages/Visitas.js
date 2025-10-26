@@ -1,20 +1,65 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
-import './Common.css';
+import Card from '../components/Card';
+import { visitasAPI } from '../services/api';
+import './Pages.css';
 
 const Visitas = () => {
+  const [visitas, setVisitas] = useState([]);
+
+  useEffect(() => {
+    cargarVisitas();
+  }, []);
+
+  const cargarVisitas = async () => {
+    try {
+      const response = await visitasAPI.obtenerTodas({});
+      setVisitas(response.data);
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
   return (
     <Layout>
-      <div className="page">
+      <div className="page-container">
         <div className="page-header">
           <div>
             <h1>Visitas Médicas</h1>
-            <p>Fichas médicas y consultas</p>
+            <p>Historial de visitas y consultas médicas</p>
           </div>
         </div>
-        <div className="empty-state" style={{ minHeight: '400px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-          <p>Módulo de visitas médicas disponible</p>
-        </div>
+
+        <Card>
+          <div className="table-container">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Paciente</th>
+                  <th>Médico</th>
+                  <th>Fecha</th>
+                  <th>Motivo</th>
+                  <th>Diagnóstico</th>
+                  <th>Estado</th>
+                  <th>Costo</th>
+                </tr>
+              </thead>
+              <tbody>
+                {visitas.map((visita) => (
+                  <tr key={visita.id}>
+                    <td><strong>{visita.paciente?.nombre}</strong></td>
+                    <td>{visita.medico?.nombre}</td>
+                    <td>{new Date(visita.fechaVisita).toLocaleDateString()}</td>
+                    <td>{visita.motivoVisita?.substring(0, 30)}...</td>
+                    <td>{visita.diagnostico?.substring(0, 30) || 'Pendiente'}...</td>
+                    <td><span className={`badge badge-${visita.estado}`}>{visita.estado}</span></td>
+                    <td>Q{visita.costoConsulta}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
       </div>
     </Layout>
   );

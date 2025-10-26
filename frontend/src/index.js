@@ -1,8 +1,3 @@
-/**
- * Punto de entrada principal de la aplicación
- * @author Omar Cabrera
- */
-
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';

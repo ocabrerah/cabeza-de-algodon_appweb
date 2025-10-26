@@ -1,148 +1,135 @@
-/**
- * Componente de Layout Principal
- * @author Omar Cabrera
- */
-
 import React, { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  FiHome, FiUsers, FiClipboard, FiActivity, FiFlask, FiPackage,
-  FiDollarSign, FiFileText, FiSettings, FiLogOut, FiMenu, FiX, FiUser
-} from 'react-icons/fi';
-import { useAuth } from '../context/AuthContext';
+import { Link, useLocation } from 'react-router-dom';
+import {
+  LayoutDashboard,
+  Users,
+  ClipboardList,
+  Stethoscope,
+  Pill,
+  Wallet,
+  FileText,
+  UserCog,
+  Menu,
+  X,
+  User
+} from 'lucide-react';
 import './Layout.css';
 
 const Layout = ({ children }) => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { user, logout } = useAuth();
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
+  // Usuario demo fijo
+  const usuario = {
+    nombre: 'Administrador Demo',
+    email: 'admin@demo.com',
+    rol: 'admin',
+    fotoPerfil: null
   };
 
-  const menuItems = [
-    { path: '/dashboard', icon: FiHome, label: 'Dashboard', roles: ['admin', 'staff', 'empleado', 'medico', 'enfermero', 'laboratorista', 'farmaceutico'] },
-    { path: '/pacientes', icon: FiUsers, label: 'Pacientes', roles: ['admin', 'staff', 'empleado', 'medico', 'enfermero'] },
-    { path: '/solicitudes', icon: FiClipboard, label: 'Solicitudes', roles: ['admin', 'staff', 'empleado', 'medico', 'enfermero', 'fundacion'] },
-    { path: '/visitas', icon: FiActivity, label: 'Visitas Médicas', roles: ['admin', 'medico', 'enfermero'] },
-    { path: '/laboratorio', icon: FiFlask, label: 'Laboratorio', roles: ['admin', 'laboratorista', 'medico'] },
-    { path: '/farmacia', icon: FiPackage, label: 'Farmacia', roles: ['admin', 'farmaceutico', 'medico'] },
-    { path: '/caja', icon: FiDollarSign, label: 'Caja', roles: ['admin', 'staff'] },
-    { path: '/reportes', icon: FiFileText, label: 'Reportes', roles: ['admin', 'staff'] },
-    { path: '/usuarios', icon: FiSettings, label: 'Usuarios', roles: ['admin'] },
-  ];
+  const location = useLocation();
+  const [sidebarAbierto, setSidebarAbierto] = useState(true);
 
-  const filteredMenu = menuItems.filter(item => 
-    !item.roles || item.roles.includes(user?.rol)
-  );
+  // Todos los menús disponibles (versión demo)
+  const menuItems = [
+    { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+    { path: '/pacientes', icon: Users, label: 'Pacientes' },
+    { path: '/solicitudes', icon: ClipboardList, label: 'Solicitudes' },
+    { path: '/visitas', icon: Stethoscope, label: 'Visitas Médicas' },
+    { path: '/farmacia', icon: Pill, label: 'Farmacia' },
+    { path: '/caja', icon: Wallet, label: 'Caja' },
+    { path: '/reportes', icon: FileText, label: 'Reportes' },
+    { path: '/usuarios', icon: UserCog, label: 'Usuarios' }
+  ];
 
   return (
     <div className="layout">
       {/* Sidebar */}
-      <AnimatePresence>
-        {(sidebarOpen || window.innerWidth > 768) && (
-          <motion.aside
-            className="sidebar"
-            initial={{ x: -300 }}
-            animate={{ x: 0 }}
-            exit={{ x: -300 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-          >
-            <div className="sidebar-header">
-              <div className="logo-container">
-                <div className="logo-gradient">
-                  <span className="logo-text">CA</span>
-                </div>
-                <div className="logo-info">
-                  <h3>Cabeza de Algodón</h3>
-                  <p>Sistema de Gestión</p>
-                </div>
+      <aside className={`sidebar ${sidebarAbierto ? 'abierto' : 'cerrado'}`}>
+        <div className="sidebar-header">
+          <div className="logo-container">
+            <div className="logo-icon">🏥</div>
+            {sidebarAbierto && (
+              <div className="logo-text">
+                <h2>Cabeza de Algodón</h2>
+                <span>Sistema de Gestión</span>
               </div>
-            </div>
+            )}
+          </div>
+        </div>
 
-            <nav className="sidebar-nav">
-              {filteredMenu.map((item) => {
-                const Icon = item.icon;
-                const isActive = location.pathname === item.path;
-                
-                return (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    className={`nav-item ${isActive ? 'active' : ''}`}
-                    onClick={() => window.innerWidth <= 768 && setSidebarOpen(false)}
-                  >
-                    <Icon className="nav-icon" />
-                    <span>{item.label}</span>
-                    {isActive && (
-                      <motion.div
-                        className="active-indicator"
-                        layoutId="activeIndicator"
-                        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                      />
-                    )}
-                  </Link>
-                );
-              })}
-            </nav>
+        <nav className="sidebar-nav">
+          {menuItems.map((item) => {
+            const Icon = item.icon;
+            const activo = location.pathname === item.path;
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`nav-item ${activo ? 'activo' : ''}`}
+                title={!sidebarAbierto ? item.label : ''}
+              >
+                <Icon size={20} />
+                {sidebarAbierto && <span>{item.label}</span>}
+              </Link>
+            );
+          })}
+        </nav>
 
-            <div className="sidebar-footer">
-              <div className="user-info">
+        <div className="sidebar-footer">
+          <button
+            className="nav-item"
+            onClick={() => setSidebarAbierto(!sidebarAbierto)}
+            title={sidebarAbierto ? 'Contraer' : 'Expandir'}
+          >
+            {sidebarAbierto ? <X size={20} /> : <Menu size={20} />}
+            {sidebarAbierto && <span>Contraer</span>}
+          </button>
+        </div>
+      </aside>
+
+      {/* Contenido principal */}
+      <div className="main-content">
+        {/* Header */}
+        <header className="header">
+          <div className="header-left">
+            <button
+              className="menu-toggle"
+              onClick={() => setSidebarAbierto(!sidebarAbierto)}
+            >
+              <Menu size={24} />
+            </button>
+            <h1 className="page-title">
+              {menuItems.find(item => item.path === location.pathname)?.label || 'Asilo Cabeza de Algodón'}
+            </h1>
+          </div>
+
+          <div className="header-right">
+            <div className="user-menu">
+              <Link to="/mi-perfil" className="user-info">
                 <div className="user-avatar">
-                  <FiUser />
+                  {usuario?.fotoPerfil ? (
+                    <img src={usuario.fotoPerfil} alt={usuario.nombre} />
+                  ) : (
+                    <User size={20} />
+                  )}
                 </div>
                 <div className="user-details">
-                  <p className="user-name">{user?.nombre} {user?.apellido}</p>
-                  <p className="user-role">{user?.rol}</p>
+                  <span className="user-name">{usuario?.nombre}</span>
+                  <span className="user-role">DEMO</span>
                 </div>
-              </div>
-              <button onClick={handleLogout} className="logout-btn">
-                <FiLogOut />
-                <span>Cerrar Sesión</span>
-              </button>
-            </div>
-          </motion.aside>
-        )}
-      </AnimatePresence>
-
-      {/* Main Content */}
-      <div className="main-content">
-        <header className="topbar">
-          <button 
-            className="menu-toggle"
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-          >
-            {sidebarOpen ? <FiX /> : <FiMenu />}
-          </button>
-
-          <div className="topbar-actions">
-            <div className="user-badge">
-              <FiUser />
-              <span>{user?.nombre}</span>
+              </Link>
             </div>
           </div>
         </header>
 
-        <main className="content">
+        {/* Contenido de la página */}
+        <main className="page-content">
           {children}
         </main>
 
+        {/* Footer */}
         <footer className="footer">
-          <p>© 2025 Asilo Cabeza de Algodón - Desarrollado por Omar Cabrera</p>
+          <p>&copy; 2025 Asilo Cabeza de Algodón - Todos los derechos reservados - O. Cabrera</p>
         </footer>
       </div>
-
-      {/* Overlay para móviles */}
-      {sidebarOpen && window.innerWidth <= 768 && (
-        <div 
-          className="sidebar-overlay"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
     </div>
   );
 };

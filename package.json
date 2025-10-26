@@ -1,17 +1,15 @@
 {
-  "name": "sistema-asilo-cabeza-de-algodon",
+  "name": "cabeza-de-algodon",
   "version": "1.0.0",
-  "description": "Sistema de Gestión del Asilo de Ancianos Cabeza de Algodón",
-  "author": "Omar Cabrera",
+  "description": "Sistema de Gestión para Asilo de Ancianos Cabeza de Algodón",
+  "author": "O. Cabrera",
   "license": "PROPRIETARY",
-  "private": true,
   "scripts": {
-    "install-all": "npm install && cd frontend && npm install && cd ../backend && npm install",
-    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "dev:frontend": "cd frontend && npm start",
-    "dev:backend": "cd backend && npm run dev",
-    "build": "cd frontend && npm run build",
-    "start": "cd backend && npm start"
+    "install-all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "dev": "concurrently \"npm run backend\" \"npm run frontend\"",
+    "backend": "cd backend && npm run dev",
+    "frontend": "cd frontend && npm start",
+    "start": "npm run dev"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
